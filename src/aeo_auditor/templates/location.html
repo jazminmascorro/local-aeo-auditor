@@ -11,7 +11,7 @@
 </head>
 <body>
   <div class="wrap">
-    <a class="back" href="/">← Portfolio</a>
+    <a class="back" href="{{ back_url or '/' }}">← Portfolio</a>
     <header class="hero">
       <div class="eyebrow">AEO Readiness Scorecard</div>
       <h1>{{ loc.client }} — {{ loc.address.city or '' }}{% if loc.address.street %} / {{ loc.address.street }}{% endif %}</h1>

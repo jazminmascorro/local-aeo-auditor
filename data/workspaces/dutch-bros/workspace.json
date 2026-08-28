@@ -1,0 +1,115 @@
+{
+  "slug": "dutch-bros",
+  "name": "Dutch Bros",
+  "created_at": "2026-08-28T06:10:03.683037+00:00",
+  "updated_at": "2026-08-28T06:10:04.768874+00:00",
+  "allowed_domains": [
+    "dutchbros.com",
+    "www.dutchbros.com"
+  ],
+  "location_url_pattern": "/locations/",
+  "location_url_min_path_segments": 3,
+  "sitemap_url": "https://www.dutchbros.com/locations/sitemap.xml",
+  "expected_schema_types": [
+    "LocalBusiness",
+    "CafeOrCoffeeShop",
+    "Restaurant",
+    "FoodEstablishment"
+  ],
+  "business_type": "coffee_shop",
+  "question_sets": [
+    "hours",
+    "location",
+    "services",
+    "amenities",
+    "payments",
+    "menu",
+    "ordering"
+  ],
+  "client_config_slug": "dutch-bros",
+  "sources": [
+    {
+      "type": "sitemap",
+      "label": "https://www.dutchbros.com/locations/sitemap.xml",
+      "detail": "Sitemap response body was empty",
+      "connected_at": "2026-08-28T06:10:04.314120+00:00",
+      "location_count": 0,
+      "meta": {
+        "status_code": 200,
+        "empty_body": true,
+        "error": "Sitemap response body was empty",
+        "urls_found": 0,
+        "location_urls_found": 0
+      }
+    },
+    {
+      "type": "csv",
+      "label": "sample_locations.csv",
+      "detail": "0 added, 5 updated",
+      "connected_at": "2026-08-28T06:10:03.687712+00:00",
+      "location_count": 5,
+      "meta": {
+        "rows_parsed": 5,
+        "rows_skipped": 0,
+        "mapped_columns": {
+          "location_id": "location_id",
+          "location_name": "location_name",
+          "city": "city",
+          "region": "region",
+          "postal_code": "postal_code",
+          "url": "url",
+          "phone": "phone"
+        },
+        "upload_path": "/workspace/data/workspaces/dutch-bros/uploads/2026-08-28T061003.686486+0000_sample_locations.csv"
+      }
+    },
+    {
+      "type": "urls",
+      "label": "demo_urls",
+      "detail": "5 URLs",
+      "connected_at": "2026-08-28T06:10:03.685609+00:00",
+      "location_count": 5,
+      "meta": {}
+    }
+  ],
+  "last_job_id": "2c9ed0264ba5",
+  "last_audit_at": "2026-08-28T06:10:04.768864+00:00",
+  "portfolio_summary": {
+    "client": "Dutch Bros",
+    "locations_discovered": 5,
+    "locations_crawled": 5,
+    "average_aeo_score": 84.9,
+    "category_averages": {
+      "discovery": 80.0,
+      "entity_clarity": 100.0,
+      "structured_data": 100.0,
+      "answer_coverage": 79.4,
+      "local_uniqueness": 65.0
+    },
+    "score_distribution": {
+      "Strong": 5
+    },
+    "systemic_opportunities": [
+      "5 locations contain structured/visible data inconsistencies",
+      "5 locations contain possible hours conflicts"
+    ],
+    "cross_location_stats": {
+      "drive_thru_explicit": 5,
+      "drive_thru_missing": 0,
+      "walk_up_explicit": 0,
+      "pickup_explicit": 5,
+      "missing_phone": 0,
+      "missing_geo": 0,
+      "missing_hours": 0,
+      "low_answer_coverage": 0,
+      "low_uniqueness": 0,
+      "locations_with_conflicts": 5,
+      "hours_conflicts": 5,
+      "avg_word_count": 1550.0,
+      "schema_type_variants": 1,
+      "duplicate_names": 1,
+      "n": 5
+    },
+    "last_run_count": 5
+  }
+}

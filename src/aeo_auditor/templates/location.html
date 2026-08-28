@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{{ loc.location_name or 'Location' }} — {{ product_name }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/styles.css"/>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="/">← Portfolio</a>
+    <header class="hero">
+      <div class="eyebrow">AEO Readiness Scorecard</div>
+      <h1>{{ loc.client }} — {{ loc.address.city or '' }}{% if loc.address.street %} / {{ loc.address.street }}{% endif %}</h1>
+      <p class="subtitle"><a href="{{ loc.url }}" target="_blank" rel="noopener">{{ loc.url }}</a></p>
+      {% if loc.scorecard %}
+      <div class="score">{{ '%.0f'|format(loc.scorecard.total) }} / 100 <span class="pill">{{ loc.scorecard.band }}</span></div>
+      <div class="score-grid">
+        <div class="stat"><div class="label">Discovery</div><div class="value">{{ '%.0f'|format(loc.scorecard.discovery.score) }}/20</div></div>
+        <div class="stat"><div class="label">Entity Clarity</div><div class="value">{{ '%.0f'|format(loc.scorecard.entity_clarity.score) }}/20</div></div>
+        <div class="stat"><div class="label">Structured Data</div><div class="value">{{ '%.0f'|format(loc.scorecard.structured_data.score) }}/20</div></div>
+        <div class="stat"><div class="label">Answer Coverage</div><div class="value">{{ '%.0f'|format(loc.scorecard.answer_coverage.score) }}/20</div></div>
+        <div class="stat"><div class="label">Local Uniqueness</div><div class="value">{{ '%.0f'|format(loc.scorecard.local_uniqueness.score) }}/20</div></div>
+      </div>
+      {% endif %}
+    </header>
+
+    <section class="panel">
+      <h2>Strengths</h2>
+      <ul class="clean">
+        {% for s in loc.strengths %}<li class="mark-yes">✓ {{ s }}</li>{% else %}<li class="muted">None listed</li>{% endfor %}
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>Opportunities</h2>
+      <ul class="clean">
+        {% for o in loc.opportunities %}<li class="mark-partial">△ {{ o }}</li>{% else %}<li class="muted">None listed</li>{% endfor %}
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>Missing answers</h2>
+      <ul class="clean">
+        {% for m in loc.missing_answers[:12] %}<li class="mark-no">✗ {{ m }}</li>{% else %}<li class="muted">All evaluated questions answerable</li>{% endfor %}
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>Schema opportunities</h2>
+      <ul class="clean">
+        {% for s in loc.schema_opportunities %}
+        <li>{% if 'correctly' in s or 'present' in s %}<span class="mark-yes">✓</span>{% elif 'incomplete' in s or 'may be' in s %}<span class="mark-partial">△</span>{% else %}<span class="mark-no">✗</span>{% endif %} {{ s }}</li>
+        {% else %}<li class="muted">None listed</li>{% endfor %}
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>Extracted facts</h2>
+      <table>
+        <tr><th>Field</th><th>Value</th></tr>
+        <tr><td>Location ID</td><td>{{ loc.location_id or '—' }}</td></tr>
+        <tr><td>Name</td><td>{{ loc.location_name or '—' }}</td></tr>
+        <tr><td>Address</td><td>{{ loc.address.full or '—' }}</td></tr>
+        <tr><td>Phone</td><td>{{ loc.phone or '—' }}</td></tr>
+        <tr><td>Geo</td><td>{% if loc.geo.latitude is not none %}{{ loc.geo.latitude }}, {{ loc.geo.longitude }}{% else %}—{% endif %}</td></tr>
+        <tr><td>Hours</td><td><code>{{ loc.hours }}</code></td></tr>
+        <tr><td>Services</td><td><code>{{ loc.services }}</code></td></tr>
+        <tr><td>Amenities</td><td><code>{{ loc.amenities }}</code></td></tr>
+        <tr><td>Canonical</td><td>{{ loc.canonical_url or '—' }}</td></tr>
+        <tr><td>Schema types</td><td>{{ loc.schema_types | join(', ') or '—' }}</td></tr>
+        <tr><td>Word count</td><td>{{ loc.local_content.word_count }}</td></tr>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>Conflicts</h2>
+      <table>
+        <thead><tr><th>Attribute</th><th>Visible</th><th>Structured</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for c in loc.conflicts %}
+          <tr>
+            <td>{{ c.attribute }}</td>
+            <td>{{ c.visible_value or '—' }}</td>
+            <td>{{ c.structured_value or '—' }}</td>
+            <td>{{ c.status.value }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" class="muted">No conflicts detected</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>Question coverage</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Question</th>
+            <th>Known</th>
+            <th>Visible</th>
+            <th>Structured</th>
+            <th>Answerable</th>
+            <th>Evidence</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for q in questions %}
+          <tr>
+            <td>{{ q.question }}</td>
+            <td class="mark-{{ 'yes' if q.fact_known else 'no' }}">{{ '✓' if q.fact_known else '✗' }}</td>
+            <td class="mark-{{ 'yes' if q.visible_on_page else 'no' }}">{{ '✓' if q.visible_on_page else '✗' }}</td>
+            <td class="mark-{{ 'yes' if q.structured else 'no' }}">{{ '✓' if q.structured else '✗' }}</td>
+            <td class="mark-{{ 'yes' if q.explicitly_answered else 'no' }}">{{ '✓' if q.explicitly_answered else '✗' }}</td>
+            <td class="muted">{{ q.evidence or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>Recommendations</h2>
+      <ul class="clean">
+        {% for r in loc.recommendations[:20] %}
+        <li>
+          <span class="pill {{ r.priority.value|lower }}">{{ r.priority.value }}</span>
+          <strong>{{ r.title }}</strong> — {{ r.message }}
+          {% if r.evidence %}<div class="muted">Evidence: {{ r.evidence }}</div>{% endif %}
+        </li>
+        {% else %}
+        <li class="muted">No recommendations</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>Evidence findings</h2>
+      <table>
+        <thead><tr><th>Check</th><th>Result</th><th>Evidence</th><th>Source</th></tr></thead>
+        <tbody>
+          {% for f in loc.findings %}
+          <tr>
+            <td>{{ f.check }}</td>
+            <td>{{ f.result }}</td>
+            <td>{{ f.evidence or '—' }}</td>
+            <td>{{ f.source or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <p class="footer-note">Evidence-backed findings only. Unknown attributes remain null — facts are never invented.</p>
+  </div>
+</body>
+</html>

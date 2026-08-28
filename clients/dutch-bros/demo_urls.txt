@@ -1,0 +1,6 @@
+# Demo store pages for Dutch Bros (first milestone — do not crawl full network)
+https://www.dutchbros.com/locations/az/phoenix/2961-e.-bell-rd.
+https://www.dutchbros.com/locations/az/phoenix/1201-e.-glendale-ave.
+https://www.dutchbros.com/locations/az/phoenix/12629-n.-paradise-village-pkwy.
+https://www.dutchbros.com/locations/az/phoenix/605-w.-bell-road
+https://www.dutchbros.com/locations/az/phoenix/3550-w.-camelback-road

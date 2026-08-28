@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{{ product_name }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/styles.css"/>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="eyebrow">Location Intelligence</div>
+      <h1>{{ product_name }}</h1>
+      <p class="subtitle">{{ subtitle }}</p>
+    </header>
+
+    <section class="panel">
+      <h2>Run analysis</h2>
+      <form class="analyze" method="post" action="/analyze">
+        <label>Client
+          <select name="client">
+            <option value="">Ad hoc</option>
+            {% for c in clients %}
+            <option value="{{ c }}" {% if c == 'dutch-bros' %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>Single URL (optional)
+          <input type="url" name="url" placeholder="https://example.com/locations/..."/>
+        </label>
+        <label>Limit
+          <input type="number" name="limit" value="5" min="1" max="50"/>
+        </label>
+        <label>Use demo URLs
+          <select name="demo">
+            <option value="on" selected>Yes</option>
+            <option value="off">No</option>
+          </select>
+        </label>
+        <button type="submit">Analyze</button>
+      </form>
+      <p class="muted" style="margin-top:0.75rem">Improves the completeness, clarity, consistency, and machine accessibility of location information. Does not guarantee AI citations.</p>
+    </section>
+
+    {% if portfolio %}
+    <section class="panel">
+      <h2>Portfolio Overview — {{ portfolio.client }}</h2>
+      <div class="stats">
+        <div class="stat"><div class="label">Discovered</div><div class="value">{{ portfolio.locations_discovered }}</div></div>
+        <div class="stat"><div class="label">Crawled</div><div class="value">{{ portfolio.locations_crawled }}</div></div>
+        <div class="stat"><div class="label">Avg AEO</div><div class="value">{{ '%.1f'|format(portfolio.average_aeo_score) }}</div></div>
+        <div class="stat"><div class="label">Entity Coverage</div><div class="value">{{ portfolio.category_averages.get('entity_clarity', 0) }}%</div></div>
+        <div class="stat"><div class="label">Answer Coverage</div><div class="value">{{ portfolio.category_averages.get('answer_coverage', 0) }}%</div></div>
+        <div class="stat"><div class="label">Structured Data</div><div class="value">{{ portfolio.category_averages.get('structured_data', 0) }}%</div></div>
+        <div class="stat"><div class="label">Local Uniqueness</div><div class="value">{{ portfolio.category_averages.get('local_uniqueness', 0) }}%</div></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Score distribution</h2>
+      <ul class="clean">
+        {% for label, count in portfolio.score_distribution.items() %}
+        <li>{{ label }}: {{ count }}</li>
+        {% else %}
+        <li class="muted">No distribution yet</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>Biggest systemic opportunities</h2>
+      <ul class="clean">
+        {% for opp in portfolio.systemic_opportunities %}
+        <li>{{ opp }}</li>
+        {% else %}
+        <li class="muted">No systemic gaps flagged for this run</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>Location table</h2>
+      <table>
+        <thead>
+          <tr>
+            <th><a href="/?sort=location&order={{ 'asc' if sort=='location' and order=='desc' else 'desc' }}">Location</a></th>
+            <th><a href="/?sort=city&order={{ 'asc' if sort=='city' and order=='desc' else 'asc' }}">City</a></th>
+            <th><a href="/?sort=state&order={{ 'asc' if sort=='state' and order=='desc' else 'asc' }}">State</a></th>
+            <th>URL</th>
+            <th><a href="/?sort=aeo_score&order={{ 'asc' if sort=='aeo_score' and order=='desc' else 'desc' }}">AEO</a></th>
+            <th><a href="/?sort=discovery&order={{ 'asc' if sort=='discovery' and order=='desc' else 'desc' }}">Discovery</a></th>
+            <th><a href="/?sort=entity&order={{ 'asc' if sort=='entity' and order=='desc' else 'desc' }}">Entity</a></th>
+            <th><a href="/?sort=schema&order={{ 'asc' if sort=='schema' and order=='desc' else 'desc' }}">Schema</a></th>
+            <th><a href="/?sort=answers&order={{ 'asc' if sort=='answers' and order=='desc' else 'desc' }}">Answers</a></th>
+            <th><a href="/?sort=uniqueness&order={{ 'asc' if sort=='uniqueness' and order=='desc' else 'desc' }}">Uniqueness</a></th>
+            <th>Issues</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for loc in locations %}
+          {% set sc = loc.scorecard %}
+          <tr>
+            <td><a href="/location?url={{ loc.url | urlencode }}">{{ loc.location_name or 'Location' }}</a></td>
+            <td>{{ loc.address.city or '—' }}</td>
+            <td>{{ loc.address.region or '—' }}</td>
+            <td><a href="{{ loc.url }}" target="_blank" rel="noopener">open</a></td>
+            <td>{{ '%.0f'|format(sc.total) if sc else '—' }}</td>
+            <td>{{ '%.0f'|format(sc.discovery.score) if sc else '—' }}</td>
+            <td>{{ '%.0f'|format(sc.entity_clarity.score) if sc else '—' }}</td>
+            <td>{{ '%.0f'|format(sc.structured_data.score) if sc else '—' }}</td>
+            <td>{{ '%.0f'|format(sc.answer_coverage.score) if sc else '—' }}</td>
+            <td>{{ '%.0f'|format(sc.local_uniqueness.score) if sc else '—' }}</td>
+            <td>{{ loc.conflicts|length + loc.opportunities|length }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="11" class="muted">No locations in the latest run.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% else %}
+    <section class="panel">
+      <h2>No run loaded</h2>
+      <p class="muted">Run an analysis above, or from the CLI: <code>aeo analyze --client dutch-bros --demo --limit 5</code></p>
+    </section>
+    {% endif %}
+
+    <p class="footer-note">AEO Readiness is a proprietary diagnostic framework — not a Google, OpenAI, Bing, or Yext metric.</p>
+  </div>
+</body>
+</html>

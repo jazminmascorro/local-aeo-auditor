@@ -1,0 +1,31 @@
+client_name: Dutch Bros
+client_slug: dutch-bros
+location_sitemap: https://www.dutchbros.com/locations/sitemap.xml
+allowed_domains:
+  - dutchbros.com
+  - www.dutchbros.com
+location_url_pattern: /locations/
+# Store pages typically look like /locations/{state}/{city}/{street-slug}
+location_url_min_path_segments: 3
+expected_schema_types:
+  - LocalBusiness
+  - CafeOrCoffeeShop
+  - Restaurant
+  - FoodEstablishment
+business_type: coffee_shop
+question_sets:
+  - hours
+  - location
+  - services
+  - amenities
+  - payments
+  - menu
+  - ordering
+demo_urls_file: demo_urls.txt
+# Optional CSS/text hints (client-specific, not core rules)
+extraction_hints:
+  service_labels:
+    - drive thru
+    - drive-thru
+    - pickup window
+    - walk-up

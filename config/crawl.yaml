@@ -1,0 +1,11 @@
+user_agent: "LocationAnswerabilityAuditor/0.1 (+https://github.com/jazminmascorro/local-aeo-auditor)"
+delay_seconds: 1.0
+concurrency: 2
+timeout_seconds: 30
+max_retries: 3
+retry_backoff_seconds: 2.0
+cache_dir: ".cache/pages"
+cache_enabled: true
+follow_redirects: true
+max_redirects: 5
+resume_journal: ".cache/completed_urls.json"

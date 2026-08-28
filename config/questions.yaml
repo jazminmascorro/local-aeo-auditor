@@ -1,0 +1,140 @@
+categories:
+  hours:
+    - id: open_time
+      question: "What time does this location open?"
+      fact_keys: [hours.open]
+    - id: close_time
+      question: "What time does this location close?"
+      fact_keys: [hours.close]
+    - id: open_now
+      question: "Is this location open right now?"
+      fact_keys: [hours.open_now]
+    - id: open_sunday
+      question: "Is this location open on Sunday?"
+      fact_keys: [hours.sunday]
+    - id: holiday_hours
+      question: "What are the holiday hours?"
+      fact_keys: [hours.holiday]
+
+  location:
+    - id: where_is
+      question: "Where is this location?"
+      fact_keys: [address.full]
+    - id: address
+      question: "What is the address?"
+      fact_keys: [address.street, address.city]
+    - id: neighborhood
+      question: "What neighborhood is it in?"
+      fact_keys: [address.neighborhood]
+    - id: nearby_landmarks
+      question: "What businesses or landmarks is it near?"
+      fact_keys: [nearby_landmarks]
+    - id: closest_location
+      question: "What is the closest location?"
+      fact_keys: [nearby_locations]
+
+  services:
+    - id: drive_thru
+      question: "Does this location have a drive-thru?"
+      fact_keys: [services.drive_thru]
+      keywords: ["drive-thru", "drive thru", "drivethru"]
+    - id: walk_up
+      question: "Does this location have a walk-up window?"
+      fact_keys: [services.walk_up]
+      keywords: ["walk-up", "walk up", "walkup"]
+    - id: order_ahead
+      question: "Can I order ahead?"
+      fact_keys: [services.order_ahead]
+      keywords: ["order ahead", "order-ahead"]
+    - id: pickup
+      question: "Does this location offer pickup?"
+      fact_keys: [services.pickup]
+      keywords: ["pickup", "pick-up", "pick up", "pickup window"]
+    - id: delivery
+      question: "Does this location offer delivery?"
+      fact_keys: [services.delivery]
+      keywords: ["delivery"]
+
+  amenities:
+    - id: indoor_seating
+      question: "Does this location have indoor seating?"
+      fact_keys: [amenities.indoor_seating]
+      keywords: ["indoor seating", "inside seating"]
+    - id: outdoor_seating
+      question: "Does this location have outdoor seating?"
+      fact_keys: [amenities.outdoor_seating]
+      keywords: ["outdoor seating", "patio"]
+    - id: parking
+      question: "Is parking available?"
+      fact_keys: [amenities.parking]
+      keywords: ["parking"]
+    - id: wifi
+      question: "Is Wi-Fi available?"
+      fact_keys: [amenities.wifi]
+      keywords: ["wi-fi", "wifi", "wi fi"]
+    - id: wheelchair
+      question: "Is this location wheelchair accessible?"
+      fact_keys: [amenities.wheelchair_accessible]
+      keywords: ["wheelchair", "accessible", "ada"]
+
+  payments:
+    - id: cash
+      question: "Does this location accept cash?"
+      fact_keys: [payment_methods]
+      keywords: ["cash"]
+    - id: credit_cards
+      question: "Does this location accept credit cards?"
+      fact_keys: [payment_methods]
+      keywords: ["credit card", "credit cards", "visa", "mastercard"]
+    - id: apple_pay
+      question: "Does this location accept Apple Pay?"
+      fact_keys: [payment_methods]
+      keywords: ["apple pay"]
+    - id: payment_methods
+      question: "What payment methods are accepted?"
+      fact_keys: [payment_methods]
+      keywords: ["payment", "accepts"]
+
+  menu:
+    - id: products_available
+      question: "What drinks/products are available?"
+      fact_keys: [menu_features]
+      keywords: ["menu", "drinks", "coffee"]
+    - id: dairy_free
+      question: "Are dairy-free options available?"
+      fact_keys: [menu_features]
+      keywords: ["dairy-free", "dairy free", "oat milk", "almond milk"]
+    - id: sugar_free
+      question: "Are sugar-free options available?"
+      fact_keys: [menu_features]
+      keywords: ["sugar-free", "sugar free"]
+    - id: caffeine_free
+      question: "Are caffeine-free options available?"
+      fact_keys: [menu_features]
+      keywords: ["caffeine-free", "caffeine free", "decaf"]
+    - id: cold_brew
+      question: "Does this location offer cold brew?"
+      fact_keys: [menu_features]
+      keywords: ["cold brew"]
+    - id: customize
+      question: "Can drinks/products be customized?"
+      fact_keys: [menu_features]
+      keywords: ["custom", "customize", "customizable"]
+
+  ordering:
+    - id: order_online
+      question: "Can I order online?"
+      fact_keys: [services.order_ahead]
+      keywords: ["order online", "online order"]
+    - id: order_app
+      question: "Can I order through an app?"
+      fact_keys: [services.order_ahead]
+      keywords: ["app", "mobile app"]
+    - id: schedule_order
+      question: "Can I schedule an order?"
+      fact_keys: [services.order_ahead]
+      keywords: ["schedule", "scheduled order"]
+    - id: pickup_order
+      question: "Can I pick up an order at this location?"
+      fact_keys: [services.pickup]
+      keywords: ["pick up", "pickup", "pick-up"]

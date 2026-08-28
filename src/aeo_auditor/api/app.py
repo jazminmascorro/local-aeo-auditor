@@ -5,8 +5,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import Any
-from urllib.parse import quote
-
 from fastapi import FastAPI, Form, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -94,9 +92,9 @@ async def home(request: Request, sort: str = Query("aeo_score"), order: str = Qu
         locations.sort(key=sort_key, reverse=reverse)
 
     return templates.TemplateResponse(
+        request,
         "index.html",
         {
-            "request": request,
             "portfolio": portfolio,
             "locations": locations,
             "clients": list_clients(),
@@ -118,9 +116,9 @@ async def location_detail(request: Request, url: str = Query(...)) -> Any:
         return HTMLResponse(f"Location not found: {url}", status_code=404)
     questions = list(loc.answerable_questions.values())
     return templates.TemplateResponse(
+        request,
         "location.html",
         {
-            "request": request,
             "loc": loc,
             "questions": questions,
             "product_name": "Location Answerability Auditor",

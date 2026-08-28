@@ -22,6 +22,31 @@ pip install -e ".[dev]"
 
 Optional environment variables: see [`.env.example`](.env.example). LLM assistance is optional and disabled by default.
 
+## Enterprise workspaces
+
+Each company gets a **workspace** with a persisted location registry.
+
+```bash
+# Seed Dutch Bros workspace (sample CSV + demo URLs)
+python3 -m aeo_auditor.cli workspace seed --client dutch-bros
+python3 -m aeo_auditor.cli workspace list
+
+# Import inventory
+python3 -m aeo_auditor.cli workspace import-csv dutch-bros clients/dutch-bros/sample_locations.csv
+python3 -m aeo_auditor.cli workspace import-sitemap dutch-bros --limit 50
+
+# Audit registry (limit 0/omit for larger batches via UI; CLI default 5)
+python3 -m aeo_auditor.cli workspace audit dutch-bros --limit 5
+
+# Dashboard — workspaces, CSV upload, sitemap connect, portfolio
+python3 -m aeo_auditor.cli serve --host 0.0.0.0 --port 8000
+# open http://127.0.0.1:8000/ → Dutch Bros → Data sources / Audit
+```
+
+**CSV columns:** required `url` (aliases: `location_url`, `store_url`, `website`, `link`). Optional: `location_id`, `location_name`, `city`, `region`/`state`, `postal_code`, `phone`.
+
+Registry data lives under `data/workspaces/<slug>/` (locations, sources, jobs, audits).
+
 ## Development commands
 
 ```bash

@@ -11,6 +11,10 @@ venv/
 !.env.example
 .cache/
 output/
+data/workspaces/*/audits/
+data/workspaces/*/jobs/
+data/workspaces/*/uploads/
+*.pyc
 *.log
 .pytest_cache/
 .mypy_cache/

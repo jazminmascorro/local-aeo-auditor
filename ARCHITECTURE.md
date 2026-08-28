@@ -16,6 +16,22 @@ Sitemap / URL list
   → Dashboard + CSV/JSON/HTML exports
 ```
 
+## Enterprise workspaces (current slice)
+
+Multi-company support without auth yet:
+
+```
+Workspace (Dutch Bros, Acme, …)
+  ├── Data sources: sitemap URL · CSV upload · pasted URLs
+  ├── Location registry (persisted inventory)
+  ├── Audit jobs (limit / full registry)
+  └── Portfolio dashboard + location scorecards
+```
+
+Storage: `data/workspaces/<slug>/` (`workspace.json`, `locations.json`, `uploads/`, `jobs/`, `audits/`).
+
+CSV is the enterprise default when sitemaps are empty or incomplete (as with Dutch Bros today). Sitemap connect still records Discovery findings.
+
 ## Package layout
 
 ```

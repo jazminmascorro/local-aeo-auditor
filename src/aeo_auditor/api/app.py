@@ -1,23 +1,27 @@
-"""FastAPI dashboard application."""
+"""FastAPI enterprise workspace dashboard."""
 
 from __future__ import annotations
 
 import json
-from pathlib import Path
 from typing import Any
-from fastapi import FastAPI, Form, Query, Request
+from urllib.parse import quote
+
+from fastapi import FastAPI, File, Form, Query, Request, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from aeo_auditor.client_config import ClientConfig, list_clients
-from aeo_auditor.models import LocationEntity, PortfolioSummary
-from aeo_auditor.paths import PACKAGE_ROOT, project_path
-from aeo_auditor.pipeline import run_analysis
+from aeo_auditor.client_config import list_clients
+from aeo_auditor.models import LocationEntity
+from aeo_auditor.paths import PACKAGE_ROOT
+from aeo_auditor.workspaces import WorkspaceStore
+from aeo_auditor.workspaces.bootstrap import ensure_dutch_bros_workspace, ensure_workspace_from_client
+from aeo_auditor.workspaces.ingest import ingest_csv, ingest_sitemap, ingest_url_list
+from aeo_auditor.workspaces.jobs import run_audit_now
 
 app = FastAPI(
     title="Location Answerability Auditor",
-    description="Measure how clearly search engines and AI systems can understand and answer questions about every business location.",
+    description="Enterprise multi-location AEO readiness — workspaces, CSV upload, sitemap connect, portfolio audits.",
 )
 
 templates = Jinja2Templates(directory=str(PACKAGE_ROOT / "templates"))
@@ -25,33 +29,10 @@ static_dir = PACKAGE_ROOT / "static"
 static_dir.mkdir(exist_ok=True)
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
+store = WorkspaceStore()
 
-def output_dir() -> Path:
-    return project_path("output")
-
-
-def load_portfolio() -> PortfolioSummary | None:
-    run_path = output_dir() / "run.json"
-    if not run_path.exists():
-        summary_path = output_dir() / "summary.json"
-        if not summary_path.exists():
-            return None
-        # summary alone is not enough for detail pages
-        return None
-    data = json.loads(run_path.read_text(encoding="utf-8"))
-    locations = [LocationEntity.model_validate(loc) for loc in data.get("locations", [])]
-    summary = data.get("summary", {})
-    return PortfolioSummary(
-        client=summary.get("client", ""),
-        locations_discovered=summary.get("locations_discovered", len(locations)),
-        locations_crawled=summary.get("locations_crawled", len(locations)),
-        average_aeo_score=summary.get("average_aeo_score", 0),
-        category_averages=summary.get("category_averages", {}),
-        score_distribution=summary.get("score_distribution", {}),
-        systemic_opportunities=summary.get("systemic_opportunities", []),
-        cross_location_stats=summary.get("cross_location_stats", {}),
-        locations=locations,
-    )
+PRODUCT = "Location Answerability Auditor"
+SUBTITLE = "Measure how clearly search engines and AI systems can understand and answer questions about every business location."
 
 
 def mark(value: bool | None) -> str:
@@ -63,27 +44,97 @@ def mark(value: bool | None) -> str:
 
 
 templates.env.globals["mark"] = mark
+templates.env.globals["product_name"] = PRODUCT
+templates.env.globals["quote"] = quote
+
+
+@app.on_event("startup")
+def _startup() -> None:
+    try:
+        ensure_dutch_bros_workspace(store)
+    except Exception:
+        pass
+
+
+@app.get("/health")
+async def health() -> dict[str, str]:
+    return {"status": "ok", "product": PRODUCT}
 
 
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request, sort: str = Query("aeo_score"), order: str = Query("desc")) -> Any:
-    portfolio = load_portfolio()
-    locations = list(portfolio.locations) if portfolio else []
+async def home(request: Request) -> Any:
+    ensure_dutch_bros_workspace(store)
+    workspaces = store.list_workspaces()
+    return templates.TemplateResponse(
+        request,
+        "workspaces.html",
+        {
+            "workspaces": workspaces,
+            "clients": list_clients(),
+            "subtitle": SUBTITLE,
+            "flash": request.query_params.get("flash"),
+        },
+    )
 
-    def sort_key(loc: LocationEntity) -> Any:
-        sc = loc.scorecard
+
+@app.post("/workspaces/create")
+async def create_workspace(
+    name: str = Form(...),
+    allowed_domains: str = Form(""),
+    location_url_pattern: str = Form("/locations/"),
+    sitemap_url: str = Form(""),
+    from_client: str = Form(""),
+) -> RedirectResponse:
+    if from_client.strip():
+        slug = ensure_workspace_from_client(from_client.strip(), store)
+        return RedirectResponse(f"/w/{slug}?flash=Workspace+ready", status_code=303)
+    domains = [d.strip() for d in allowed_domains.split(",") if d.strip()]
+    ws = store.create_workspace(
+        name.strip(),
+        allowed_domains=domains,
+        location_url_pattern=location_url_pattern.strip() or "/locations/",
+        sitemap_url=sitemap_url.strip() or None,
+    )
+    return RedirectResponse(f"/w/{ws.slug}/sources?flash=Workspace+created", status_code=303)
+
+
+@app.get("/w/{slug}", response_class=HTMLResponse)
+async def workspace_home(
+    request: Request,
+    slug: str,
+    sort: str = Query("aeo_score"),
+    order: str = Query("desc"),
+    q: str = Query(""),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(25, ge=5, le=100),
+) -> Any:
+    ws = store.get_workspace(slug)
+    locations = store.load_locations(slug)
+    if q.strip():
+        needle = q.strip().lower()
+        locations = [
+            loc
+            for loc in locations
+            if needle in (loc.location_name or "").lower()
+            or needle in (loc.city or "").lower()
+            or needle in (loc.region or "").lower()
+            or needle in loc.url.lower()
+            or needle in (loc.location_id or "").lower()
+        ]
+
+    def sort_key(loc: Any) -> Any:
         mapping = {
-            "aeo_score": sc.total if sc else -1,
-            "discovery": sc.discovery.score if sc else -1,
-            "entity": sc.entity_clarity.score if sc else -1,
-            "schema": sc.structured_data.score if sc else -1,
-            "answers": sc.answer_coverage.score if sc else -1,
-            "uniqueness": sc.local_uniqueness.score if sc else -1,
-            "city": loc.address.city or "",
-            "state": loc.address.region or "",
+            "aeo_score": loc.aeo_score if loc.aeo_score is not None else -1,
+            "discovery": loc.discovery if loc.discovery is not None else -1,
+            "entity": loc.entity_clarity if loc.entity_clarity is not None else -1,
+            "schema": loc.structured_data if loc.structured_data is not None else -1,
+            "answers": loc.answer_coverage if loc.answer_coverage is not None else -1,
+            "uniqueness": loc.local_uniqueness if loc.local_uniqueness is not None else -1,
+            "city": loc.city or "",
+            "state": loc.region or "",
             "location": loc.location_name or loc.url,
         }
-        return mapping.get(sort, sc.total if sc else -1)
+        return mapping.get(sort, loc.aeo_score if loc.aeo_score is not None else -1)
 
     reverse = order != "asc"
     if sort in {"city", "state", "location"}:
@@ -91,29 +142,126 @@ async def home(request: Request, sort: str = Query("aeo_score"), order: str = Qu
     else:
         locations.sort(key=sort_key, reverse=reverse)
 
+    total = len(locations)
+    pages = max(1, (total + page_size - 1) // page_size)
+    page = min(page, pages)
+    start = (page - 1) * page_size
+    page_rows = locations[start : start + page_size]
+    job = store.latest_job(slug)
+    audited = sum(1 for loc in store.load_locations(slug) if loc.last_audited_at)
     return templates.TemplateResponse(
         request,
-        "index.html",
+        "workspace.html",
         {
-            "portfolio": portfolio,
-            "locations": locations,
-            "clients": list_clients(),
+            "ws": ws,
+            "locations": page_rows,
+            "total": total,
+            "audited": audited,
+            "page": page,
+            "pages": pages,
+            "page_size": page_size,
             "sort": sort,
             "order": order,
-            "product_name": "Location Answerability Auditor",
-            "subtitle": "Measure how clearly search engines and AI systems can understand and answer questions about every business location.",
+            "q": q,
+            "job": job,
+            "summary": ws.portfolio_summary,
+            "flash": request.query_params.get("flash"),
+            "subtitle": SUBTITLE,
         },
     )
 
 
-@app.get("/location", response_class=HTMLResponse)
-async def location_detail(request: Request, url: str = Query(...)) -> Any:
-    portfolio = load_portfolio()
-    if not portfolio:
-        return RedirectResponse("/", status_code=302)
-    loc = next((l for l in portfolio.locations if l.url == url), None)
-    if not loc:
-        return HTMLResponse(f"Location not found: {url}", status_code=404)
+@app.get("/w/{slug}/sources", response_class=HTMLResponse)
+async def sources_page(request: Request, slug: str) -> Any:
+    ws = store.get_workspace(slug)
+    locations = store.load_locations(slug)
+    return templates.TemplateResponse(
+        request,
+        "sources.html",
+        {
+            "ws": ws,
+            "registry_count": len(locations),
+            "csv_count": sum(1 for l in locations if l.in_csv),
+            "sitemap_count": sum(1 for l in locations if l.in_sitemap),
+            "flash": request.query_params.get("flash"),
+            "error": request.query_params.get("error"),
+        },
+    )
+
+
+@app.post("/w/{slug}/sources/csv")
+async def upload_csv(slug: str, file: UploadFile = File(...)) -> RedirectResponse:
+    ws = store.get_workspace(slug)
+    content = await file.read()
+    try:
+        result = ingest_csv(store, ws, content, filename=file.filename or "locations.csv")
+        flash = f"CSV+imported:+{result['added']}+added,+{result['updated']}+updated.+Registry:+{result['total_registry']}"
+        return RedirectResponse(f"/w/{slug}/sources?flash={flash}", status_code=303)
+    except Exception as exc:  # noqa: BLE001
+        return RedirectResponse(f"/w/{slug}/sources?error={quote(str(exc))}", status_code=303)
+
+
+@app.post("/w/{slug}/sources/sitemap")
+async def connect_sitemap(
+    slug: str,
+    sitemap_url: str = Form(""),
+    limit: str = Form(""),
+) -> RedirectResponse:
+    ws = store.get_workspace(slug)
+    lim = int(limit) if limit.strip().isdigit() else None
+    try:
+        result = ingest_sitemap(store, ws, sitemap_url.strip() or None, limit=lim)
+        if result.get("empty_body") or result.get("error") or result.get("location_urls_found", 0) == 0:
+            flash = (
+                f"Sitemap+connected+but+found+{result.get('location_urls_found', 0)}+location+URLs."
+                f"+Registry+still+has+{result['total_registry']}+locations."
+                f"+Upload+a+CSV+to+cover+the+full+network."
+            )
+        else:
+            flash = f"Sitemap:+{result['added']}+added,+{result['updated']}+updated.+Registry:+{result['total_registry']}"
+        return RedirectResponse(f"/w/{slug}/sources?flash={flash}", status_code=303)
+    except Exception as exc:  # noqa: BLE001
+        return RedirectResponse(f"/w/{slug}/sources?error={quote(str(exc))}", status_code=303)
+
+
+@app.post("/w/{slug}/sources/urls")
+async def paste_urls(slug: str, urls_text: str = Form("")) -> RedirectResponse:
+    ws = store.get_workspace(slug)
+    urls = [line.strip() for line in urls_text.splitlines() if line.strip()]
+    result = ingest_url_list(store, ws, urls, source_label="pasted_urls")
+    flash = f"URLs:+{result['added']}+added.+Registry:+{result['total_registry']}"
+    return RedirectResponse(f"/w/{slug}/sources?flash={flash}", status_code=303)
+
+
+@app.post("/w/{slug}/audit")
+async def start_audit(
+    slug: str,
+    limit: str = Form("5"),
+    use_cache: str = Form("on"),
+) -> RedirectResponse:
+    lim = int(limit) if limit.strip().isdigit() else None
+    if lim == 0:
+        lim = None
+    job = run_audit_now(store, slug, limit=lim, use_cache=use_cache == "on")
+    if job.status == "failed":
+        return RedirectResponse(f"/w/{slug}?error={quote(job.error or 'Audit failed')}", status_code=303)
+    flash = f"Audit+complete:+{job.completed}/{job.total}+locations"
+    return RedirectResponse(f"/w/{slug}?flash={flash}", status_code=303)
+
+
+@app.get("/w/{slug}/location", response_class=HTMLResponse)
+async def location_detail(request: Request, slug: str, url: str = Query(...)) -> Any:
+    ws = store.get_workspace(slug)
+    entities = store.load_audit_entities(slug)
+    raw = next((e for e in entities if e.get("url") == url), None)
+    if not raw:
+        # fall back to any entity in registry scores only message
+        return HTMLResponse(
+            f"No audit detail for this URL yet. Run an audit that includes it.<br/>"
+            f"<a href='/w/{slug}'>Back</a>",
+            status_code=404,
+        )
+    loc = LocationEntity.model_validate(raw)
     questions = list(loc.answerable_questions.values())
     return templates.TemplateResponse(
         request,
@@ -121,31 +269,14 @@ async def location_detail(request: Request, url: str = Query(...)) -> Any:
         {
             "loc": loc,
             "questions": questions,
-            "product_name": "Location Answerability Auditor",
+            "workspace_slug": slug,
+            "ws": ws,
+            "back_url": f"/w/{slug}",
         },
     )
 
 
-@app.post("/analyze")
-async def analyze_form(
-    client: str = Form(""),
-    url: str = Form(""),
-    demo: str = Form(""),
-    limit: str = Form("5"),
-) -> RedirectResponse:
-    client_cfg = ClientConfig.load(client) if client else None
-    limit_n = int(limit) if limit.strip().isdigit() else 5
-    run_analysis(
-        client=client_cfg,
-        url=url.strip() or None,
-        use_demo_urls=demo == "on" or (not url.strip() and client_cfg is not None),
-        limit=limit_n,
-        use_cache=True,
-        output_dir=output_dir(),
-    )
-    return RedirectResponse("/", status_code=303)
-
-
-@app.get("/health")
-async def health() -> dict[str, str]:
-    return {"status": "ok", "product": "Location Answerability Auditor"}
+# Legacy routes kept for old bookmarks / CLI output viewing
+@app.get("/legacy", response_class=HTMLResponse)
+async def legacy_home(request: Request) -> Any:
+    return RedirectResponse("/", status_code=302)

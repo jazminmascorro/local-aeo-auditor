@@ -22,6 +22,38 @@ pip install -e ".[dev]"
 
 Optional environment variables: see [`.env.example`](.env.example). LLM assistance is optional and disabled by default.
 
+## Auth (Google login)
+
+```bash
+# Google Cloud Console → OAuth 2.0 Client
+# Redirect URI: http://127.0.0.1:8000/auth/callback
+export GOOGLE_CLIENT_ID=...
+export GOOGLE_CLIENT_SECRET=...
+export SESSION_SECRET=$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')
+export APP_BASE_URL=http://127.0.0.1:8000
+```
+
+Without Google credentials, **dev login** is enabled automatically (`AUTH_DEV_MODE`). First login auto-joins `AUTH_AUTO_JOIN_WORKSPACE` (default `dutch-bros`).
+
+## Background workers (RQ + Redis)
+
+```bash
+# Redis must be running
+redis-cli ping   # PONG
+
+# Terminal A — API
+python3 -m aeo_auditor.cli serve --host 0.0.0.0 --port 8000
+
+# Terminal B — worker
+python3 -m aeo_auditor.cli worker
+
+# Enqueue an audit (or use the UI)
+python3 -m aeo_auditor.cli workspace audit dutch-bros --limit 5
+# Force inline (no queue): --sync
+```
+
+If Redis is down, audits **fall back to synchronous** execution so the UI still works.
+
 ## Enterprise workspaces
 
 Each company gets a **workspace** with a persisted location registry.

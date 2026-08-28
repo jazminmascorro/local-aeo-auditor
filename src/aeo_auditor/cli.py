@@ -202,16 +202,35 @@ def workspace_audit(
     slug: str = typer.Argument(...),
     limit: Optional[int] = typer.Option(5, "--limit"),
     no_cache: bool = typer.Option(False, "--no-cache"),
+    sync: bool = typer.Option(False, "--sync", help="Run inline instead of RQ"),
 ) -> None:
     from aeo_auditor.workspaces import WorkspaceStore
-    from aeo_auditor.workspaces.jobs import run_audit_now
+    from aeo_auditor.workspaces.jobs import enqueue_or_run_audit
 
     store = WorkspaceStore()
-    job = run_audit_now(store, slug, limit=limit, use_cache=not no_cache)
-    console.print(f"Job {job.job_id}: {job.status} — {job.message}")
+    job, meta = enqueue_or_run_audit(
+        store, slug, limit=limit, use_cache=not no_cache, force_sync=sync
+    )
+    console.print(f"Job {job.job_id}: {job.status} — {job.message} [{meta.get('mode')}]")
     if job.error:
         console.print(f"[red]{job.error}[/red]")
         raise typer.Exit(1)
+
+
+@app.command("worker")
+def worker_cmd(
+    burst: bool = typer.Option(False, "--burst", help="Process queued jobs then exit"),
+) -> None:
+    """Run an RQ worker that processes portfolio audit jobs."""
+    from rq import Worker
+
+    from aeo_auditor.workers.queue import QUEUE_NAME, redis_conn, redis_available
+
+    if not redis_available():
+        console.print("[red]Redis is not reachable. Start Redis and set REDIS_URL if needed.[/red]")
+        raise typer.Exit(1)
+    console.print(f"Listening on queue [bold]{QUEUE_NAME}[/bold]…")
+    Worker([QUEUE_NAME], connection=redis_conn()).work(burst=burst)
 
 
 if __name__ == "__main__":

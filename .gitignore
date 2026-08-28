@@ -14,6 +14,7 @@ output/
 data/workspaces/*/audits/
 data/workspaces/*/jobs/
 data/workspaces/*/uploads/
+data/auth/
 *.pyc
 *.log
 .pytest_cache/

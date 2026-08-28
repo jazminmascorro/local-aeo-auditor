@@ -200,6 +200,37 @@ def run_audit_now(
     return run_registry_audit(store, slug, job.job_id)
 
 
+def enqueue_or_run_audit(
+    store: WorkspaceStore,
+    slug: str,
+    *,
+    limit: int | None = None,
+    use_cache: bool = True,
+    force_sync: bool = False,
+) -> tuple[AuditJob, dict]:
+    """Create a pending job and enqueue to RQ, or run inline if Redis is down / force_sync."""
+    from aeo_auditor.workers.queue import enqueue_audit, redis_available
+
+    job = start_registry_audit(store, slug, limit=limit, use_cache=use_cache)
+    meta: dict = {"mode": "sync"}
+    if force_sync or not redis_available():
+        job = run_registry_audit(store, slug, job.job_id)
+        meta["mode"] = "sync_fallback" if not force_sync else "sync"
+        meta["reason"] = None if force_sync else "redis_unavailable"
+        return job, meta
+    try:
+        rq_meta = enqueue_audit(slug, job.job_id)
+        job.message = f"Queued on RQ ({rq_meta['rq_job_id']})"
+        store.save_job(job)
+        meta = {"mode": "async", **rq_meta}
+        return job, meta
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Enqueue failed, running sync: %s", exc)
+        job = run_registry_audit(store, slug, job.job_id)
+        meta = {"mode": "sync_fallback", "reason": str(exc)}
+        return job, meta
+
+
 def _avg(values: list[float | None]) -> float:
     nums = [v for v in values if v is not None]
     return round(sum(nums) / len(nums), 1) if nums else 0.0

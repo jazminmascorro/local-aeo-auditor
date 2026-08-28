@@ -16,6 +16,13 @@ Sitemap / URL list
   → Dashboard + CSV/JSON/HTML exports
 ```
 
+## Auth + workers
+
+- **Google OAuth** (Authlib) with session cookies; **dev login** when Google is unset
+- Memberships: `data/auth/users.json` + `memberships.json` (email → workspace + role)
+- **RQ + Redis** queue `aeo_audits` for portfolio audits; sync fallback if Redis is down
+- Worker entrypoint: `python3 -m aeo_auditor.cli worker`
+
 ## Enterprise workspaces (current slice)
 
 Multi-company support without auth yet:

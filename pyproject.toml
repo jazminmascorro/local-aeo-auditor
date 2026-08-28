@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aeo-auditor"
+version = "0.1.0"
+description = "Location Answerability Auditor — multi-location AEO readiness analysis"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.30.0",
+  "jinja2>=3.1.4",
+  "httpx>=0.27.0",
+  "beautifulsoup4>=4.12.3",
+  "lxml>=5.2.0",
+  "pydantic>=2.8.0",
+  "pydantic-settings>=2.4.0",
+  "pyyaml>=6.0.2",
+  "typer>=0.12.0",
+  "rich>=13.7.0",
+  "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3.0",
+  "pytest-asyncio>=0.24.0",
+]
+
+[project.scripts]
+aeo = "aeo_auditor.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+aeo_auditor = ["templates/*", "static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

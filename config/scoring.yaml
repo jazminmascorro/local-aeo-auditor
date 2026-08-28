@@ -1,0 +1,122 @@
+# Proprietary AEO Readiness Score (0–100). Not affiliated with Google, OpenAI, Bing, or Yext.
+max_total: 100
+
+categories:
+  discovery:
+    max_points: 20
+    checks:
+      - id: status_200
+        points: 5
+        description: "URL returns HTTP 200"
+      - id: indexable
+        points: 4
+        description: "Page is indexable (no noindex)"
+      - id: self_canonical
+        points: 4
+        description: "Self-referencing canonical"
+      - id: in_sitemap
+        points: 4
+        description: "URL included in location sitemap"
+      - id: no_blocking_robots
+        points: 3
+        description: "No blocking robots directives"
+
+  entity_clarity:
+    max_points: 20
+    checks:
+      - id: location_name
+        points: 3
+        description: "Location name present"
+      - id: address_street
+        points: 3
+        description: "Street address present"
+      - id: address_city_region_postal
+        points: 3
+        description: "City, region, and postal code present"
+      - id: phone
+        points: 3
+        description: "Phone number present"
+      - id: geo_coordinates
+        points: 2
+        description: "Latitude and longitude present"
+      - id: location_identifier
+        points: 2
+        description: "Store/location identifier present"
+      - id: breadcrumbs
+        points: 2
+        description: "Breadcrumb hierarchy present"
+      - id: nearby_locations
+        points: 2
+        description: "Nearby location relationships present"
+
+  structured_data:
+    max_points: 20
+    checks:
+      - id: valid_json_ld
+        points: 3
+        description: "Valid JSON-LD present"
+      - id: business_entity_type
+        points: 3
+        description: "Appropriate business entity type"
+      - id: location_specific_schema
+        points: 3
+        description: "Location-specific schema entity"
+      - id: schema_address
+        points: 2
+        description: "Structured address"
+      - id: schema_phone
+        points: 2
+        description: "Structured phone"
+      - id: schema_geo
+        points: 2
+        description: "Structured geo coordinates"
+      - id: schema_hours
+        points: 2
+        description: "Structured opening hours"
+      - id: parent_organization
+        points: 2
+        description: "Parent organization / brand"
+      - id: canonical_url_alignment
+        points: 1
+        description: "Schema URL aligns with canonical"
+
+  answer_coverage:
+    max_points: 20
+    description: "Scaled from percentage of relevant questions that are answerable"
+
+  local_uniqueness:
+    max_points: 20
+    checks:
+      - id: location_description
+        points: 4
+        description: "Location-specific description"
+      - id: unique_neighborhood_content
+        points: 4
+        description: "Unique neighborhood/local content"
+      - id: location_amenities
+        points: 3
+        description: "Location-specific amenities stated"
+      - id: location_services
+        points: 3
+        description: "Location-specific services stated"
+      - id: local_faqs
+        points: 2
+        description: "Locally relevant FAQs"
+      - id: nearby_landmarks
+        points: 2
+        description: "Nearby landmarks mentioned"
+      - id: limited_boilerplate
+        points: 2
+        description: "Limited boilerplate duplication"
+
+bands:
+  - min: 90
+    label: Excellent
+  - min: 80
+    label: Strong
+  - min: 70
+    label: Good
+  - min: 60
+    label: Needs improvement
+  - min: 0
+    label: Weak

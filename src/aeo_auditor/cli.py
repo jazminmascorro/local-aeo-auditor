@@ -144,5 +144,75 @@ def export_cmd(
     console.print(f"Re-exported {len(paths)} files to {output}")
 
 
+workspace_app = typer.Typer(help="Enterprise workspace commands")
+app.add_typer(workspace_app, name="workspace")
+
+
+@workspace_app.command("list")
+def workspace_list() -> None:
+    from aeo_auditor.workspaces import WorkspaceStore
+    from aeo_auditor.workspaces.bootstrap import ensure_dutch_bros_workspace
+
+    store = WorkspaceStore()
+    ensure_dutch_bros_workspace(store)
+    for ws in store.list_workspaces():
+        n = len(store.load_locations(ws.slug))
+        console.print(f"- {ws.slug}: {ws.name} ({n} locations)")
+
+
+@workspace_app.command("seed")
+def workspace_seed(client: str = typer.Option("dutch-bros", "--client")) -> None:
+    from aeo_auditor.workspaces.bootstrap import ensure_workspace_from_client
+
+    slug = ensure_workspace_from_client(client)
+    console.print(f"Seeded workspace [bold]{slug}[/bold]")
+
+
+@workspace_app.command("import-csv")
+def workspace_import_csv(
+    slug: str = typer.Argument(...),
+    csv_path: Path = typer.Argument(..., exists=True),
+) -> None:
+    from aeo_auditor.workspaces import WorkspaceStore
+    from aeo_auditor.workspaces.ingest import ingest_csv
+
+    store = WorkspaceStore()
+    ws = store.get_workspace(slug)
+    result = ingest_csv(store, ws, csv_path.read_bytes(), filename=csv_path.name)
+    console.print(result)
+
+
+@workspace_app.command("import-sitemap")
+def workspace_import_sitemap(
+    slug: str = typer.Argument(...),
+    sitemap: Optional[str] = typer.Option(None, "--sitemap"),
+    limit: Optional[int] = typer.Option(None, "--limit"),
+) -> None:
+    from aeo_auditor.workspaces import WorkspaceStore
+    from aeo_auditor.workspaces.ingest import ingest_sitemap
+
+    store = WorkspaceStore()
+    ws = store.get_workspace(slug)
+    result = ingest_sitemap(store, ws, sitemap, limit=limit)
+    console.print(result)
+
+
+@workspace_app.command("audit")
+def workspace_audit(
+    slug: str = typer.Argument(...),
+    limit: Optional[int] = typer.Option(5, "--limit"),
+    no_cache: bool = typer.Option(False, "--no-cache"),
+) -> None:
+    from aeo_auditor.workspaces import WorkspaceStore
+    from aeo_auditor.workspaces.jobs import run_audit_now
+
+    store = WorkspaceStore()
+    job = run_audit_now(store, slug, limit=limit, use_cache=not no_cache)
+    console.print(f"Job {job.job_id}: {job.status} — {job.message}")
+    if job.error:
+        console.print(f"[red]{job.error}[/red]")
+        raise typer.Exit(1)
+
+
 if __name__ == "__main__":
     app()

@@ -175,6 +175,36 @@ ul.clean li { margin: 0.25rem 0; }
   color: var(--muted);
 }
 .back { font-family: "IBM Plex Sans", sans-serif; margin-bottom: 1rem; display: inline-block; }
+.flash {
+  font-family: "IBM Plex Sans", sans-serif;
+  background: #e7f3ea;
+  border: 1px solid #b7d8c0;
+  color: #1f5b35;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+.flash.error {
+  background: #fceceb;
+  border-color: #e5b4ad;
+  color: #8a2e24;
+}
+.nav-actions { margin-top: 0.5rem; }
+.nav-actions .btn { display: inline-block; padding: 0.55rem 0.9rem; }
+.pager {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1rem;
+  font-family: "IBM Plex Sans", sans-serif;
+}
+textarea {
+  width: 100%;
+  font: inherit;
+  font-family: "IBM Plex Sans", sans-serif;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--line);
+  background: #fff;
+}
 
 @keyframes rise {
   from { opacity: 0; transform: translateY(8px); }

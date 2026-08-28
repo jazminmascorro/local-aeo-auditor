@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Data sources — {{ ws.name }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/styles.css"/>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="/w/{{ ws.slug }}">← {{ ws.name }}</a>
+    <header class="hero">
+      <div class="eyebrow">Location inventory</div>
+      <h1>Data sources</h1>
+      <p class="subtitle">Build the location registry from a sitemap, CSV upload, or pasted URLs. CSV is the enterprise default when sitemaps are incomplete.</p>
+    </header>
+
+    {% if flash %}<div class="flash">{{ flash|replace('+', ' ') }}</div>{% endif %}
+    {% if error %}<div class="flash error">{{ error|replace('+', ' ') }}</div>{% endif %}
+
+    <section class="panel">
+      <h2>Registry status</h2>
+      <div class="stats">
+        <div class="stat"><div class="label">Total locations</div><div class="value">{{ registry_count }}</div></div>
+        <div class="stat"><div class="label">From CSV</div><div class="value">{{ csv_count }}</div></div>
+        <div class="stat"><div class="label">In sitemap</div><div class="value">{{ sitemap_count }}</div></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Connect sitemap</h2>
+      <form class="analyze" method="post" action="/w/{{ ws.slug }}/sources/sitemap">
+        <label>Sitemap URL
+          <input type="url" name="sitemap_url" value="{{ ws.sitemap_url or '' }}" placeholder="https://www.example.com/locations/sitemap.xml" required/>
+        </label>
+        <label>Limit (optional)
+          <input type="number" name="limit" min="1" placeholder="all"/>
+        </label>
+        <button type="submit">Fetch &amp; import</button>
+      </form>
+      <p class="muted" style="margin-top:0.75rem">Pattern filter: <code>{{ ws.location_url_pattern }}</code> · min path segments after pattern: {{ ws.location_url_min_path_segments }}</p>
+    </section>
+
+    <section class="panel">
+      <h2>Upload location CSV</h2>
+      <p class="muted">Required column: <code>url</code> (aliases: location_url, store_url, website, link). Optional: location_id, location_name, city, region/state, postal_code, phone.</p>
+      <form class="analyze" method="post" action="/w/{{ ws.slug }}/sources/csv" enctype="multipart/form-data">
+        <label>CSV file
+          <input type="file" name="file" accept=".csv,text/csv" required/>
+        </label>
+        <button type="submit">Upload &amp; merge</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Paste URL list</h2>
+      <form method="post" action="/w/{{ ws.slug }}/sources/urls">
+        <label>One URL per line
+          <textarea name="urls_text" rows="6" placeholder="https://www.example.com/locations/..."></textarea>
+        </label>
+        <div style="margin-top:0.75rem"><button type="submit">Import URLs</button></div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Connected sources</h2>
+      <table>
+        <thead><tr><th>Type</th><th>Label</th><th>Detail</th><th>Count</th><th>When</th></tr></thead>
+        <tbody>
+          {% for s in ws.sources %}
+          <tr>
+            <td>{{ s.type }}</td>
+            <td>{{ s.label }}</td>
+            <td class="muted">{{ s.detail or '—' }}</td>
+            <td>{{ s.location_count }}</td>
+            <td class="muted">{{ s.connected_at }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" class="muted">No sources connected yet</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>

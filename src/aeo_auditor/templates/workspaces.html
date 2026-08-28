@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{{ product_name }} — Workspaces</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/styles.css"/>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="eyebrow">Enterprise workspaces</div>
+      <h1>{{ product_name }}</h1>
+      <p class="subtitle">{{ subtitle }}</p>
+    </header>
+
+    {% if flash %}<div class="flash">{{ flash|replace('+', ' ') }}</div>{% endif %}
+
+    <section class="panel">
+      <h2>Workspaces</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Slug</th>
+            <th>Sitemap</th>
+            <th>Last audit</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ws in workspaces %}
+          <tr>
+            <td><strong>{{ ws.name }}</strong></td>
+            <td><code>{{ ws.slug }}</code></td>
+            <td class="muted">{{ ws.sitemap_url or '—' }}</td>
+            <td class="muted">{{ ws.last_audit_at or 'Not audited' }}</td>
+            <td><a class="btn" href="/w/{{ ws.slug }}">Open</a></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" class="muted">No workspaces yet</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>Create workspace</h2>
+      <form class="analyze" method="post" action="/workspaces/create">
+        <label>Company name
+          <input name="name" required placeholder="Acme Coffee"/>
+        </label>
+        <label>Allowed domains (comma-separated)
+          <input name="allowed_domains" placeholder="acme.com, www.acme.com"/>
+        </label>
+        <label>Location URL pattern
+          <input name="location_url_pattern" value="/locations/"/>
+        </label>
+        <label>Sitemap URL (optional)
+          <input name="sitemap_url" type="url" placeholder="https://www.acme.com/locations/sitemap.xml"/>
+        </label>
+        <label>Or bootstrap from client config
+          <select name="from_client">
+            <option value="">—</option>
+            {% for c in clients %}
+            <option value="{{ c }}">{{ c }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <button type="submit">Create</button>
+      </form>
+    </section>
+
+    <p class="footer-note">No login in this slice — workspaces are local file-backed registries. Auth comes next.</p>
+  </div>
+</body>
+</html>

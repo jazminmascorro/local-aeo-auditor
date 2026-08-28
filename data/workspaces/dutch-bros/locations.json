@@ -1,0 +1,129 @@
+{
+  "locations": [
+    {
+      "location_id": "AZ0602",
+      "location_name": "Dutch Bros in Phoenix, AZ",
+      "city": "Phoenix",
+      "region": "AZ",
+      "postal_code": "85032",
+      "url": "https://www.dutchbros.com/locations/az/phoenix/2961-e.-bell-rd.",
+      "phone": "+18778992767",
+      "sources": [
+        "demo_urls",
+        "csv"
+      ],
+      "in_sitemap": null,
+      "in_csv": true,
+      "last_audited_at": "2026-08-28T06:10:04.616431+00:00",
+      "aeo_score": 84.88,
+      "band": "Strong",
+      "discovery": 16.0,
+      "entity_clarity": 20.0,
+      "structured_data": 20.0,
+      "answer_coverage": 15.88,
+      "local_uniqueness": 13.0,
+      "issues_count": 3,
+      "audit_entity": null
+    },
+    {
+      "location_id": "AZ0634",
+      "location_name": "Dutch Bros in Phoenix, AZ",
+      "city": "Phoenix",
+      "region": "AZ",
+      "postal_code": "85023",
+      "url": "https://www.dutchbros.com/locations/az/phoenix/605-w.-bell-road",
+      "phone": "+18778992767",
+      "sources": [
+        "demo_urls",
+        "csv"
+      ],
+      "in_sitemap": null,
+      "in_csv": true,
+      "last_audited_at": "2026-08-28T06:10:04.654005+00:00",
+      "aeo_score": 84.88,
+      "band": "Strong",
+      "discovery": 16.0,
+      "entity_clarity": 20.0,
+      "structured_data": 20.0,
+      "answer_coverage": 15.88,
+      "local_uniqueness": 13.0,
+      "issues_count": 3,
+      "audit_entity": null
+    },
+    {
+      "location_id": "AZ0529",
+      "location_name": "Dutch Bros in Phoenix, AZ",
+      "city": "Phoenix",
+      "region": "AZ",
+      "postal_code": "85019",
+      "url": "https://www.dutchbros.com/locations/az/phoenix/3550-w.-camelback-road",
+      "phone": "+18778992767",
+      "sources": [
+        "demo_urls",
+        "csv"
+      ],
+      "in_sitemap": null,
+      "in_csv": true,
+      "last_audited_at": "2026-08-28T06:10:04.689198+00:00",
+      "aeo_score": 84.88,
+      "band": "Strong",
+      "discovery": 16.0,
+      "entity_clarity": 20.0,
+      "structured_data": 20.0,
+      "answer_coverage": 15.88,
+      "local_uniqueness": 13.0,
+      "issues_count": 3,
+      "audit_entity": null
+    },
+    {
+      "location_id": "AZ0610",
+      "location_name": "Dutch Bros in Phoenix, AZ",
+      "city": "Phoenix",
+      "region": "AZ",
+      "postal_code": "85020",
+      "url": "https://www.dutchbros.com/locations/az/phoenix/1201-e.-glendale-ave.",
+      "phone": "+18778992767",
+      "sources": [
+        "demo_urls",
+        "csv"
+      ],
+      "in_sitemap": null,
+      "in_csv": true,
+      "last_audited_at": "2026-08-28T06:10:04.724215+00:00",
+      "aeo_score": 84.88,
+      "band": "Strong",
+      "discovery": 16.0,
+      "entity_clarity": 20.0,
+      "structured_data": 20.0,
+      "answer_coverage": 15.88,
+      "local_uniqueness": 13.0,
+      "issues_count": 3,
+      "audit_entity": null
+    },
+    {
+      "location_id": "AZ0611",
+      "location_name": "Dutch Bros in Phoenix, AZ",
+      "city": "Phoenix",
+      "region": "AZ",
+      "postal_code": "85032",
+      "url": "https://www.dutchbros.com/locations/az/phoenix/12629-n.-paradise-village-pkwy.",
+      "phone": "+18778992767",
+      "sources": [
+        "demo_urls",
+        "csv"
+      ],
+      "in_sitemap": null,
+      "in_csv": true,
+      "last_audited_at": "2026-08-28T06:10:04.758144+00:00",
+      "aeo_score": 84.88,
+      "band": "Strong",
+      "discovery": 16.0,
+      "entity_clarity": 20.0,
+      "structured_data": 20.0,
+      "answer_coverage": 15.88,
+      "local_uniqueness": 13.0,
+      "issues_count": 3,
+      "audit_entity": null
+    }
+  ]
+}

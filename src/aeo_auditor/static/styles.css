@@ -188,8 +188,10 @@ ul.clean li { margin: 0.25rem 0; }
   border-color: #e5b4ad;
   color: #8a2e24;
 }
-.nav-actions { margin-top: 0.5rem; }
+.nav-actions { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
 .nav-actions .btn { display: inline-block; padding: 0.55rem 0.9rem; }
+.user-bar { margin-bottom: 0.5rem; }
+.pill.high { border-color: var(--yes); color: var(--yes); }
 .pager {
   display: flex;
   gap: 1rem;

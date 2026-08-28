@@ -4,6 +4,9 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>{{ ws.name }} — {{ product_name }}</title>
+    {% if poll %}
+    <meta http-equiv="refresh" content="3"/>
+    {% endif %}
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet"/>
@@ -18,10 +21,17 @@
       <p class="subtitle">Location registry + AEO readiness across the network. Connect a sitemap or upload a CSV, then audit.</p>
       <div class="nav-actions">
         <a class="btn" href="/w/{{ ws.slug }}/sources">Data sources</a>
+        {% if user %}
+        <span class="muted">{{ user.email }} · {{ membership_role or 'member' }}</span>
+        {% endif %}
+        <span class="pill">Redis {{ 'ok' if redis_ok else 'down (sync fallback)' }}</span>
       </div>
     </header>
 
     {% if flash %}<div class="flash">{{ flash|replace('+', ' ') }}</div>{% endif %}
+    {% if poll %}
+    <div class="flash">Audit running… page refreshes every 3s ({{ job.completed }}/{{ job.total }} — {{ job.status }})</div>
+    {% endif %}
 
     <section class="panel">
       <h2>Portfolio overview</h2>
@@ -48,12 +58,38 @@
             <option value="off">No</option>
           </select>
         </label>
+        <label>Force sync (skip queue)
+          <select name="sync">
+            <option value="" selected>No — use RQ</option>
+            <option value="on">Yes</option>
+          </select>
+        </label>
         <button type="submit">Audit locations</button>
       </form>
       {% if job %}
-      <p class="muted" style="margin-top:0.75rem">Last job {{ job.job_id }}: {{ job.status }} — {{ job.message }} ({{ job.completed }}/{{ job.total }})</p>
+      <p class="muted" style="margin-top:0.75rem">Last job {{ job.job_id }}: <strong>{{ job.status }}</strong> — {{ job.message }} ({{ job.completed }}/{{ job.total }})</p>
       {% endif %}
+      <p class="muted">Start a worker with <code>python3 -m aeo_auditor.cli worker</code> so queued jobs process in the background.</p>
     </section>
+
+    {% if membership_role == 'admin' %}
+    <section class="panel">
+      <h2>Invite teammate</h2>
+      <form class="analyze" method="post" action="/w/{{ ws.slug }}/members">
+        <label>Email
+          <input type="email" name="email" required placeholder="teammate@company.com"/>
+        </label>
+        <label>Role
+          <select name="role">
+            <option value="analyst">analyst</option>
+            <option value="viewer">viewer</option>
+            <option value="admin">admin</option>
+          </select>
+        </label>
+        <button type="submit">Add member</button>
+      </form>
+    </section>
+    {% endif %}
 
     {% if summary and summary.systemic_opportunities %}
     <section class="panel">

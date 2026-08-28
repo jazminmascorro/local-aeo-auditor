@@ -2,7 +2,7 @@
   "slug": "dutch-bros",
   "name": "Dutch Bros",
   "created_at": "2026-08-28T06:10:03.683037+00:00",
-  "updated_at": "2026-08-28T06:10:04.768874+00:00",
+  "updated_at": "2026-08-28T06:26:41.433877+00:00",
   "allowed_domains": [
     "dutchbros.com",
     "www.dutchbros.com"
@@ -72,8 +72,8 @@
       "meta": {}
     }
   ],
-  "last_job_id": "2c9ed0264ba5",
-  "last_audit_at": "2026-08-28T06:10:04.768864+00:00",
+  "last_job_id": "d2851b483bad",
+  "last_audit_at": "2026-08-28T06:26:41.433866+00:00",
   "portfolio_summary": {
     "client": "Dutch Bros",
     "locations_discovered": 5,
@@ -90,26 +90,26 @@
       "Strong": 5
     },
     "systemic_opportunities": [
-      "5 locations contain structured/visible data inconsistencies",
-      "5 locations contain possible hours conflicts"
+      "1 locations contain structured/visible data inconsistencies",
+      "1 locations contain possible hours conflicts"
     ],
     "cross_location_stats": {
-      "drive_thru_explicit": 5,
+      "drive_thru_explicit": 1,
       "drive_thru_missing": 0,
       "walk_up_explicit": 0,
-      "pickup_explicit": 5,
+      "pickup_explicit": 1,
       "missing_phone": 0,
       "missing_geo": 0,
       "missing_hours": 0,
       "low_answer_coverage": 0,
       "low_uniqueness": 0,
-      "locations_with_conflicts": 5,
-      "hours_conflicts": 5,
-      "avg_word_count": 1550.0,
+      "locations_with_conflicts": 1,
+      "hours_conflicts": 1,
+      "avg_word_count": 1549.0,
       "schema_type_variants": 1,
-      "duplicate_names": 1,
-      "n": 5
+      "duplicate_names": 0,
+      "n": 1
     },
-    "last_run_count": 5
+    "last_run_count": 1
   }
 }

@@ -15,12 +15,32 @@
       <div class="eyebrow">Enterprise workspaces</div>
       <h1>{{ product_name }}</h1>
       <p class="subtitle">{{ subtitle }}</p>
+      <div class="nav-actions user-bar">
+        {% if user %}
+          <span class="muted">Signed in as <strong>{{ user.name or user.email }}</strong></span>
+          <form method="post" action="/auth/logout" style="display:inline">
+            <button type="submit">Sign out</button>
+          </form>
+        {% else %}
+          <a class="btn" href="/auth/login">Sign in</a>
+        {% endif %}
+        <span class="pill {% if redis_ok %}high{% endif %}" title="Redis for RQ workers">Redis {{ 'ok' if redis_ok else 'down' }}</span>
+      </div>
     </header>
 
     {% if flash %}<div class="flash">{{ flash|replace('+', ' ') }}</div>{% endif %}
 
+    {% if not user %}
+    <section class="panel">
+      <h2>Sign in required</h2>
+      <p class="muted">Sign in with Google to open your company workspace. In local/dev mode you can use the demo login.</p>
+      <p><a class="btn" href="/auth/login">Sign in</a></p>
+    </section>
+    {% endif %}
+
     <section class="panel">
       <h2>Workspaces</h2>
+      {% if user %}
       <table>
         <thead>
           <tr>
@@ -41,12 +61,16 @@
             <td><a class="btn" href="/w/{{ ws.slug }}">Open</a></td>
           </tr>
           {% else %}
-          <tr><td colspan="5" class="muted">No workspaces yet</td></tr>
+          <tr><td colspan="5" class="muted">No workspaces assigned to your account yet.</td></tr>
           {% endfor %}
         </tbody>
       </table>
+      {% else %}
+      <p class="muted">Sign in to see workspaces you can access.</p>
+      {% endif %}
     </section>
 
+    {% if user %}
     <section class="panel">
       <h2>Create workspace</h2>
       <form class="analyze" method="post" action="/workspaces/create">
@@ -73,8 +97,9 @@
         <button type="submit">Create</button>
       </form>
     </section>
+    {% endif %}
 
-    <p class="footer-note">No login in this slice — workspaces are local file-backed registries. Auth comes next.</p>
+    <p class="footer-note">Google login for production. Dev login is enabled only when Google OAuth is not configured or AUTH_DEV_MODE=true.</p>
   </div>
 </body>
 </html>

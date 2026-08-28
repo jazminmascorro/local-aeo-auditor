@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Sign in — {{ product_name }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/styles.css"/>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="eyebrow">Secure access</div>
+      <h1>Sign in</h1>
+      <p class="subtitle">Sign in to access your company workspace, location registry, and AEO portfolio audits.</p>
+    </header>
+
+    {% if flash %}<div class="flash">{{ flash|replace('+', ' ') }}</div>{% endif %}
+
+    <section class="panel" style="max-width:28rem">
+      {% if google_enabled %}
+      <p><a class="btn" href="/auth/google?next={{ next_url | urlencode }}">Continue with Google</a></p>
+      {% else %}
+      <p class="muted">Google OAuth is not configured. Set <code>GOOGLE_CLIENT_ID</code> and <code>GOOGLE_CLIENT_SECRET</code> to enable it.</p>
+      {% endif %}
+
+      {% if auth_dev_mode %}
+      <hr style="border:none;border-top:1px solid var(--line);margin:1.25rem 0"/>
+      <h2 style="font-size:1rem">Dev login</h2>
+      <p class="muted">Local MVP fallback when Google credentials are absent.</p>
+      <form method="post" action="/auth/dev-login" class="analyze">
+        <input type="hidden" name="next" value="{{ next_url }}"/>
+        <label>Email
+          <input name="email" value="demo.analyst@example.com"/>
+        </label>
+        <label>Name
+          <input name="name" value="Demo Analyst"/>
+        </label>
+        <button type="submit">Continue as demo user</button>
+      </form>
+      {% endif %}
+    </section>
+  </div>
+</body>
+</html>
